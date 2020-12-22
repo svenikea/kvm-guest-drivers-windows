@@ -39,3 +39,13 @@ class NetKvm_RssDiagnostics : MSNdis
     [read,write,WmiDataId(5)] uint32 rxErrors;
 };
 
+[Dynamic : ToInstance, Provider("WMIProv"), WMI,
+guid("{15C62B55-F41F-4784-AECE-E9952BA5951B}")]
+class NetKvm_GenericCmd : MSNdis
+{
+    [key, read] string InstanceName;
+    [read] boolean Active;
+    [read,write,WmiDataId(1)] uint32 command;
+	// 0 - indicate network change (possible)
+	// 1 - indicate network change (definite)
+};

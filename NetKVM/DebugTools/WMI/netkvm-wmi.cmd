@@ -5,6 +5,7 @@ if /i "%1"=="debug" goto debug
 if /i "%1"=="stat" goto stat
 if /i "%1"=="reset" goto reset
 if /i "%1"=="rss" goto rss_set
+if /i "%1"=="cmd" goto generic
 goto help
 :debug
 call :dowmic netkvm_logging set level=%2
@@ -27,6 +28,10 @@ if "%2"=="" goto rss
 call :dowmic NetKvm_RssDiagnostics set DeviceSupport=%2
 goto :eof
 
+:generic
+call :dowmic NetKvm_GenericCmd set command=%2
+goto :eof
+
 :dowmic
 wmic /namespace:\\root\wmi path %*
 goto :eof
@@ -39,5 +44,8 @@ echo stat                   Retrieves internal statistics
 echo reset                  Resets internal statistics
 echo rss                    Query RSS statistics
 echo rss 0/1                Disable/enable RSS device support
+echo cmd 0-1                Generic command
+echo                        0 - possible network change
+echo                        1 - definite network change
 goto :eof
 
