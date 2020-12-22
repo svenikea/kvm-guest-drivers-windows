@@ -340,7 +340,10 @@ public:
 
         m_TxStateMachine.Start();
         m_RxStateMachine.Start();
+
         m_Started = true;
+
+        ParaNdis_IndicateNetworkChange(m_BoundAdapter, false);
     }
     // called under protocol mutex
     // when netkvm adapter comes and binding present
