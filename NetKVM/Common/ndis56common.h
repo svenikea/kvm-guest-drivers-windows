@@ -721,6 +721,9 @@ VOID ParaNdis_SetLinkState(
     PARANDIS_ADAPTER *pContext,
     NDIS_MEDIA_CONNECT_STATE LinkState);
 
+VOID ParaNdis_IndicateNetworkChange(
+    PARANDIS_ADAPTER *pContext, bool bDefinitely);
+
 #endif //-OFFLOAD_UNIT_TEST
 
 typedef enum _tagppResult

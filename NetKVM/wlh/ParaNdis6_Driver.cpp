@@ -87,6 +87,25 @@ static bool FORCEINLINE IsProtocolActive(PARANDIS_ADAPTER *pContext)
     return virtio_is_feature_enabled(pContext->u64GuestFeatures, VIRTIO_NET_F_STANDBY);
 }
 
+VOID ParaNdis_IndicateNetworkChange(PARANDIS_ADAPTER *pContext, bool bDefinitely)
+{
+    NDIS_STATUS_INDICATION  indication;
+    NDIS_NETWORK_CHANGE_TYPE networkChange = bDefinitely ?
+        NdisDefinitelyNetworkChange : NdisPossibleNetworkChange;
+
+    NdisZeroMemory(&indication, sizeof(indication));
+
+    indication.Header.Type = NDIS_OBJECT_TYPE_STATUS_INDICATION;
+    indication.Header.Revision = NDIS_STATUS_INDICATION_REVISION_1;
+    indication.Header.Size = NDIS_SIZEOF_STATUS_INDICATION_REVISION_1;
+    indication.SourceHandle = pContext->MiniportHandle;
+    indication.StatusCode = NDIS_STATUS_NETWORK_CHANGE;
+    indication.StatusBuffer = &networkChange;
+    indication.StatusBufferSize = sizeof(NDIS_NETWORK_CHANGE_TYPE);
+    DPrintf(0, "Indicating %s network change\n", bDefinitely ? "definite" : "possible");
+    NdisMIndicateStatusEx(pContext->MiniportHandle, &indication);
+}
+
 static const char *ConnectStateName(NDIS_MEDIA_CONNECT_STATE state)
 {
     if (state == MediaConnectStateConnected) return "Connected";
