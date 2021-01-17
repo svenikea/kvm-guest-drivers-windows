@@ -394,6 +394,22 @@ public:
         }
         return true;
     }
+    void PostOpStateEvent()
+    {
+        CPassiveSpinLockedContext lock(m_OpStateLock);
+        if (m_BoundAdapter && (!m_Operational || m_BindCompleted))
+        {
+            auto wi = new (m_BindingHandle)COperationWorkItem(this, m_Operational, m_BoundAdapter->MiniportHandle);
+            if (wi && !wi->Run())
+            {
+                wi->Destroy(wi, m_BindingHandle);
+            }
+        }
+        else
+        {
+            TraceNoPrefix(0, "[%s] skipped\n", __FUNCTION__);
+        }
+    }
     void OnStatusIndication(PNDIS_STATUS_INDICATION StatusIndication)
     {
         switch (StatusIndication->StatusCode)
