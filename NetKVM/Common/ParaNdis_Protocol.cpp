@@ -357,16 +357,13 @@ public:
             return;
         }
         m_BoundAdapter = Adapter;
-        if (!m_Operational)
-        {
-            ULONG millies = 100;
-            NdisMSleep(millies * 1000);
-        }
-        if (m_Operational)
+        if (m_Operational && m_BindCompleted)
         {
             OnAdapterAttached();
-        } else {
-            TraceNoPrefix(0, "[%s] WARNING: the adapter is not in operational state!\n", __FUNCTION__);
+        }
+        else
+        {
+            TraceNoPrefix(0, "[%s] the adapter is not in operational state yet\n", __FUNCTION__);
         }
     }
 
@@ -425,15 +422,7 @@ public:
                             m_Operational = state;
                             TraceNoPrefix(0, "[%s] the adapter is %sperational\n",
                                 __FUNCTION__, m_Operational ? "O" : "NOT O");
-                            CPassiveSpinLockedContext lock(m_OpStateLock);
-                            if (m_BoundAdapter)
-                            {
-                                auto wi = new (m_BindingHandle)COperationWorkItem(this, state, m_BoundAdapter->MiniportHandle);
-                                if (wi && !wi->Run())
-                                {
-                                    wi->Destroy(wi, m_BindingHandle);
-                                }
-                            }
+                            PostOpStateEvent();
                         }
                     }
                 }
