@@ -470,7 +470,16 @@ public:
     }
     void OnPnPEvent(PNET_PNP_EVENT_NOTIFICATION NetPnPEventNotification)
     {
-        TraceNoPrefix(0, "[%s] event %X\n", __FUNCTION__, NetPnPEventNotification->NetPnPEvent.NetEvent);
+        NET_PNP_EVENT_CODE ev = NetPnPEventNotification->NetPnPEvent.NetEvent;
+        TraceNoPrefix(0, "[%s] event %X\n", __FUNCTION__, ev);
+        if (ev == NetEventBindsComplete)
+        {
+            m_BindCompleted = true;
+            if (m_Operational)
+            {
+                PostOpStateEvent();
+            }
+        }
     }
     CFlowStateMachine m_RxStateMachine;
     CFlowStateMachine m_TxStateMachine;
@@ -692,7 +701,15 @@ public:
             )
         {
             CProtocolBinding *binding = (CProtocolBinding *)ProtocolBindingContext;
-            binding->OnPnPEvent(NetPnPEventNotification);
+            if (binding)
+            {
+                binding->OnPnPEvent(NetPnPEventNotification);
+            }
+            else
+            {
+                // global PnP indications
+                ProtocolData->GlobalPnpEvent(NetPnPEventNotification);
+            }
             return NDIS_STATUS_SUCCESS;
         };
         NDIS_STATUS status = NdisRegisterProtocolDriver(this, &pchs, &m_ProtocolHandle);
@@ -706,6 +723,19 @@ public:
             NdisDeregisterProtocolDriver(m_ProtocolHandle);
             TraceNoPrefix(0, "[%s] Deregistering protocol done\n", __FUNCTION__);
         }
+    }
+    void GlobalPnpEvent(PNET_PNP_EVENT_NOTIFICATION NetPnPEventNotification)
+    {
+        CMutexLockedContext protect(m_Mutex);
+        m_Adapters.ForEach([&](CAdapterEntry *e)
+        {
+            CProtocolBinding *binding = (CProtocolBinding *)e->m_Binding;
+            if (binding)
+            {
+                binding->OnPnPEvent(NetPnPEventNotification);
+            }
+            return true;
+        });
     }
     NDIS_STATUS OnBindAdapter(_In_ NDIS_HANDLE BindContext, _In_ PNDIS_BIND_PARAMETERS BindParameters)
     {
