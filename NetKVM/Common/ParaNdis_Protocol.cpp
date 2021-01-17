@@ -496,6 +496,7 @@ private:
     bool       m_Operational = false;
     // set and clear under protocol mutex
     bool       m_Started = false;
+    bool       m_BindCompleted = false;
     PDEVICE_OBJECT m_Pdo = NULL;
     NDIS_STATUS m_Status;
     struct
