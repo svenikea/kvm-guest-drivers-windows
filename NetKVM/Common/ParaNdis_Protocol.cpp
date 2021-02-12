@@ -340,6 +340,8 @@ public:
         m_TxStateMachine.Start();
         m_RxStateMachine.Start();
         SetOid(OID_GEN_CURRENT_PACKET_FILTER, &m_BoundAdapter->PacketFilter, sizeof(m_BoundAdapter->PacketFilter));
+        m_BoundAdapter->bSuppressLinkUp = false;
+        ParaNdis_SynchronizeLinkState(m_BoundAdapter);
         m_Started = true;
     }
     // called under protocol mutex
