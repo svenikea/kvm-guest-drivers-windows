@@ -324,7 +324,6 @@ public:
     void OnAdapterAttached()
     {
         TraceNoPrefix(0, "[%s] %p\n", __FUNCTION__, m_BoundAdapter);
-        SetOid(OID_GEN_CURRENT_PACKET_FILTER, &m_BoundAdapter->PacketFilter, sizeof(m_BoundAdapter->PacketFilter));
         if (m_BoundAdapter->MulticastData.nofMulticastEntries)
         {
             SetOid(OID_802_3_MULTICAST_LIST, m_BoundAdapter->MulticastData.MulticastList,
@@ -340,6 +339,7 @@ public:
 
         m_TxStateMachine.Start();
         m_RxStateMachine.Start();
+        SetOid(OID_GEN_CURRENT_PACKET_FILTER, &m_BoundAdapter->PacketFilter, sizeof(m_BoundAdapter->PacketFilter));
         m_Started = true;
     }
     // called under protocol mutex
