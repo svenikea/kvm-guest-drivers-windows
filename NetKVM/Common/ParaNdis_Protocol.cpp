@@ -323,6 +323,7 @@ public:
     // when VFIO adapter enters operational state
     void OnAdapterAttached()
     {
+        ULONG waitTime = 100; //ms
         TraceNoPrefix(0, "[%s] %p\n", __FUNCTION__, m_BoundAdapter);
         if (m_BoundAdapter->MulticastData.nofMulticastEntries)
         {
@@ -340,6 +341,10 @@ public:
         m_TxStateMachine.Start();
         m_RxStateMachine.Start();
         SetOid(OID_GEN_CURRENT_PACKET_FILTER, &m_BoundAdapter->PacketFilter, sizeof(m_BoundAdapter->PacketFilter));
+
+        TraceNoPrefix(0, "[%s] Wait %d ms until the adapter finally restarted\n", __FUNCTION__, waitTime);
+        NdisMSleep(waitTime * 1000);
+
         m_BoundAdapter->bSuppressLinkUp = false;
         ParaNdis_SynchronizeLinkState(m_BoundAdapter);
         m_Started = true;
